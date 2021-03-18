@@ -1,17 +1,13 @@
 package android.exercise.mini.interactions;
 
 import android.app.Activity;
-import android.inputmethodservice.Keyboard;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -36,12 +32,8 @@ public class EditTitleActivity extends AppCompatActivity {
   private EditText editTextTitle;
 
 
-
-  private int i = 0, j = 0;
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    i++;
     super.onCreate(savedInstanceState);
     InputMethodManager imm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
     setContentView(R.layout.activity_edit_title);
@@ -76,21 +68,17 @@ public class EditTitleActivity extends AppCompatActivity {
       imm.showSoftInput(editTextTitle, InputMethodManager.SHOW_IMPLICIT);    // 6
     });
 
-    Button tests = findViewById(R.id.tests);
-
-    tests.setOnClickListener(v ->{
-    });
+//    Button tests = findViewById(R.id.tests);
+//
+//    tests.setOnClickListener(v ->{
+//      tests.animate()
+//              .alpha(0)
+//              .start();
+//
+//    });
 
     // handle clicks on "done edit"
     fabEditDone.setOnClickListener(v -> {
-      /*
-      TODO:
-      1. animate out the "done edit" FAB
-      2. animate in the "start edit" FAB
-
-      to complete (1.) & (2.), start by just changing visibility. only add animations after everything else is ready
-       */
-
       toggleViewMode();
 
       textViewTitle.setText(editTextTitle.getText());
@@ -109,13 +97,6 @@ public class EditTitleActivity extends AppCompatActivity {
   @Override
   public void onBackPressed() {
     // BACK button was clicked
-    /*
-    TODO:
-    if user is now editing, tap on BACK will revert the edit. do the following:
-    3. animate out the "done-edit" FAB
-    4. animate in the "start-edit" FAB
-
-     */
     if (isEditing){
       toggleViewMode();
       textViewTitle.setText(currentTitle);
@@ -125,19 +106,49 @@ public class EditTitleActivity extends AppCompatActivity {
 
   }
 
+  private void animateFadeOutFab(FloatingActionButton fab){
+    fab.setClickable(false);
+
+    fab.clearAnimation();
+    fab.animate()
+            .scaleX(0f)
+            .scaleY(0f)
+            .setDuration(200L)
+            .withEndAction(() -> {
+              fab.setVisibility(View.GONE);
+              fab.setScaleX(1f);
+              fab.setScaleY(1f);
+            })
+            .start();
+  }
+
+  private void animateFadeInFab(FloatingActionButton fab){
+    fab.clearAnimation();
+    fab.setVisibility(View.VISIBLE);
+    fab.setAlpha(0f);
+
+
+    fab.animate()
+            .alpha(1f)
+            .setDuration(400L)
+            .withEndAction(()->fab.setClickable(true))
+            .start();
+  }
+
   private void toggleViewMode(){
     editTextTitle.setVisibility(View.GONE);
     textViewTitle.setVisibility(View.VISIBLE);
 
-    fabEditDone.setVisibility(View.GONE);
-    fabStartEdit.setVisibility(View.VISIBLE);
+
+    animateFadeOutFab(fabEditDone);
+    animateFadeInFab(fabStartEdit);
 
     isEditing = false;
   }
 
   private void toggleEditMode(){
-    fabStartEdit.setVisibility(View.GONE);
-    fabEditDone.setVisibility(View.VISIBLE);
+    animateFadeOutFab(fabStartEdit);
+    animateFadeInFab(fabEditDone);
 
     textViewTitle.setVisibility(View.GONE);
     editTextTitle.setVisibility(View.VISIBLE);
